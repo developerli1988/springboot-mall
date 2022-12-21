@@ -1,6 +1,7 @@
 package com.scott.springbootmall.service.impl;
 
 import com.scott.springbootmall.dao.UserDao;
+import com.scott.springbootmall.dto.UserLoginRequest;
 import com.scott.springbootmall.dto.UserRegisterRequest;
 import com.scott.springbootmall.model.User;
 import com.scott.springbootmall.service.UserService;
@@ -34,5 +35,22 @@ public class UserServiceImpl implements UserService {
         }
 
         return userDao.createUser(userRegisterRequest);
+    }
+
+    @Override
+    public User login(UserLoginRequest userLoginRequest) {
+        User user = userDao.getUserByEmail(userLoginRequest.getEmail());
+
+        if(user == null){
+            log.warn("該email {} 尚未註冊", userLoginRequest.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        if(user.getPassword().equals(userLoginRequest.getPassword())){
+            return user;
+        }else{
+            log.warn("email {} 的密碼不正確", userLoginRequest.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
     }
 }
