@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
@@ -33,6 +34,9 @@ public class UserServiceImpl implements UserService {
             log.warn("該email {} 已經被註冊過了", userRegisterRequest.getEmail());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+        
+        String md5 = DigestUtils.md5DigestAsHex(userRegisterRequest.getPassword().getBytes());
+        userRegisterRequest.setPassword(md5);
 
         return userDao.createUser(userRegisterRequest);
     }
@@ -46,7 +50,9 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        if(user.getPassword().equals(userLoginRequest.getPassword())){
+        String md5 = DigestUtils.md5DigestAsHex(userLoginRequest.getPassword().getBytes());
+
+        if(user.getPassword().equals(md5)){
             return user;
         }else{
             log.warn("email {} 的密碼不正確", userLoginRequest.getEmail());
